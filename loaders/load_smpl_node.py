@@ -4,14 +4,11 @@ LoadSMPLParams Node - Load SMPL params from disk.
 Loads smpl_params_*.npz files from ComfyUI output folder.
 """
 
-import os
 import logging
 
 from comfy_api.latest import io
 
-import folder_paths
-
-from .shared_utils import resolve_file_path
+from .shared_utils import resolve_file_path, list_files, file_fingerprint
 
 log = logging.getLogger("motioncapture")
 
@@ -35,6 +32,7 @@ class LoadSMPLParams(io.ComfyNode):
             category="MotionCapture/SMPL",
             inputs=[
                 io.Combo.Input("file_path", options=npz_files,
+                               remote=io.RemoteOptions(route="/motioncapture/files/smpl", refresh_button=True),
                                tooltip="NPZ file containing SMPL parameters (smpl_params_*.npz from GVHMR Inference)"),
             ],
             outputs=[
@@ -44,38 +42,19 @@ class LoadSMPLParams(io.ComfyNode):
 
     @staticmethod
     def get_npz_files():
-        """Get list of smpl_params_*.npz files in input and output folders."""
-        npz_files = []
-
-        # Scan input folder
-        input_dir = folder_paths.get_input_directory()
-        if os.path.exists(input_dir):
-            for file in sorted(os.listdir(input_dir)):
-                if file.startswith("smpl_params_") and file.endswith(".npz"):
-                    npz_files.append(file)
-
-        # Scan output folder
-        output_dir = folder_paths.get_output_directory()
-        if os.path.exists(output_dir):
-            for file in sorted(os.listdir(output_dir)):
-                if file.startswith("smpl_params_") and file.endswith(".npz"):
-                    npz_files.append(f"[output] {file}")
-
-        return npz_files
+        return list_files('smpl_params_*.npz')
 
     @classmethod
     def fingerprint_inputs(cls, **kwargs):
         file_path = kwargs.get("file_path")
-        full_path = resolve_file_path(file_path)
-        if full_path and os.path.exists(full_path):
-            return os.path.getmtime(full_path)
-        return file_path
+        try:
+            return file_fingerprint(resolve_file_path(file_path))
+        except FileNotFoundError:
+            return file_path
 
     @classmethod
     def execute(cls, file_path):
         full_path = resolve_file_path(file_path)
-        if full_path is None:
-            raise FileNotFoundError(f"SMPL params file not found: {file_path}")
         log.info("Selected: %s", full_path)
         return io.NodeOutput(full_path)
 

@@ -15,6 +15,8 @@ import numpy as np
 
 from comfy_api.latest import io
 
+from .shared_utils import resolve_output_path
+
 log = logging.getLogger("motioncapture")
 
 from .smpl_bvh_utils import smpl_to_bvh
@@ -242,7 +244,7 @@ class SMPLToFBX(io.ComfyNode):
                 raise FileNotFoundError(f"Input FBX not found: {fbx_path}")
 
             # Prepare output directory
-            output_path = Path(output_path)
+            output_path = resolve_output_path(output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Extract SMPL parameters to temporary file

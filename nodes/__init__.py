@@ -1,19 +1,25 @@
 """MotionCapture Nodes."""
 
+import os
+
+import folder_paths
+
+# Apply configured paths before node imports capture directory constants.
+for directory in ("input", "output", "temp"):
+    configured = os.environ.get(f"MOTIONCAPTURE_{directory.upper()}_DIRECTORY")
+    if configured:
+        getattr(folder_paths, f"set_{directory}_directory")(configured)
+
 # GPU nodes
 from .load_model import LoadGVHMRModels
 from .inference_node import GVHMRInference
 from .save_smpl_node import SaveSMPL
-from .load_smpl_node import LoadSMPLParams as LoadSMPL
-from .load_camera_trajectory_node import LoadCameraTrajectory
 from .fbx_loader_node import LoadFBXCharacter
 from .fbx_preview_node import FBXPreview
 from .fbx_animation_viewer_node import FBXAnimationViewer
 from .smpl_to_bvh_node import SMPLtoBVH
 from .bvh_viewer_node import BVHViewer
 from .compare_smpl_bvh_node import CompareSMPLtoBVH
-from .bvh_loader_node import LoadBVHFromFolder
-from .mixamo_loader_node import LoadMixamoCharacter
 from .compare_skeletons_node import CompareSkeletons
 
 # Blender nodes
@@ -35,16 +41,12 @@ NODE_CLASS_MAPPINGS = {
     "LoadGVHMRModels": LoadGVHMRModels,
     "GVHMRInference": GVHMRInference,
     "SaveSMPL": SaveSMPL,
-    "LoadSMPL": LoadSMPL,
-    "LoadCameraTrajectory": LoadCameraTrajectory,
     "LoadFBXCharacter": LoadFBXCharacter,
     "FBXPreview": FBXPreview,
     "FBXAnimationViewer": FBXAnimationViewer,
     "SMPLtoBVH": SMPLtoBVH,
     "BVHViewer": BVHViewer,
     "CompareSMPLtoBVH": CompareSMPLtoBVH,
-    "LoadBVHFromFolder": LoadBVHFromFolder,
-    "LoadMixamoCharacter": LoadMixamoCharacter,
     "CompareSkeletons": CompareSkeletons,
     # Blender nodes
     "SMPLToFBX": SMPLToFBX,
@@ -63,16 +65,12 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "LoadGVHMRModels": "Load GVHMR Models",
     "GVHMRInference": "GVHMR Inference",
     "SaveSMPL": "Save SMPL Motion",
-    "LoadSMPL": "Load SMPL Params",
-    "LoadCameraTrajectory": "Load Camera Trajectory",
     "LoadFBXCharacter": "Load FBX Character",
     "FBXPreview": "FBX 3D Preview",
     "FBXAnimationViewer": "FBX Animation Viewer",
     "SMPLtoBVH": "SMPL to BVH Converter",
     "BVHViewer": "BVH Animation Viewer",
     "CompareSMPLtoBVH": "Compare SMPL vs BVH",
-    "LoadBVHFromFolder": "Load BVH (Dropdown)",
-    "LoadMixamoCharacter": "Load Mixamo Character",
     "CompareSkeletons": "Compare Skeletons",
     # Blender nodes
     "SMPLToFBX": "SMPL to FBX Retargeting",

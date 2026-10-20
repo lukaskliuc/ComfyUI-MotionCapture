@@ -1,10 +1,10 @@
 
 import logging
-import os
 from pathlib import Path
-from typing import Tuple, Dict, List
 
 from comfy_api.latest import io
+
+from .shared_utils import list_files, resolve_bvh_path, file_fingerprint
 
 log = logging.getLogger("motioncapture")
 
@@ -15,19 +15,7 @@ class LoadBVHFromFolder(io.ComfyNode):
 
     @classmethod
     def define_schema(cls):
-        # Scan for files
-        input_dir = Path("input")
-        output_dir = Path("output")
-
-        files = []
-
-        if input_dir.exists():
-            files.extend([f"input/{f.name}" for f in input_dir.glob("*.bvh")])
-
-        if output_dir.exists():
-            # sort by modification time (newest first) to easily find latest tests
-            out_files = sorted(list(output_dir.glob("*.bvh")), key=os.path.getmtime, reverse=True)
-            files.extend([f"output/{f.name}" for f in out_files])
+        files = list_files("*.[bB][vV][hH]", legacy_prefix=True)
 
         if not files:
             files = ["None"]
@@ -37,7 +25,8 @@ class LoadBVHFromFolder(io.ComfyNode):
             display_name="Load BVH (Dropdown)",
             category="MotionCapture/BVH",
             inputs=[
-                io.Combo.Input("bvh_file", options=files),
+                io.Combo.Input("bvh_file", options=files,
+                               remote=io.RemoteOptions(route="/motioncapture/files/bvh", refresh_button=True)),
             ],
             outputs=[
                 io.Custom("BVH_DATA").Output(display_name="bvh_data"),
@@ -49,11 +38,7 @@ class LoadBVHFromFolder(io.ComfyNode):
         if bvh_file == "None":
             return io.NodeOutput({})
 
-        # Handle paths relative to ComfyUI root
-        file_path = Path(bvh_file)
-
-        if not file_path.exists():
-            raise ValueError(f"BVH file not found: {file_path}")
+        file_path = Path(resolve_bvh_path(bvh_file))
 
         with open(file_path, 'r') as f:
             content = f.read()
@@ -89,7 +74,13 @@ class LoadBVHFromFolder(io.ComfyNode):
 
     @classmethod
     def fingerprint_inputs(cls, **kwargs):
-        return float("nan") # Always update to allow file refresh logic if needed
+        bvh_file = kwargs.get("bvh_file")
+        if bvh_file == "None":
+            return bvh_file
+        try:
+            return file_fingerprint(resolve_bvh_path(bvh_file))
+        except FileNotFoundError:
+            return bvh_file
 
 NODE_CLASS_MAPPINGS = {
     "LoadBVHFromFolder": LoadBVHFromFolder,

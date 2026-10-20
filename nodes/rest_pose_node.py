@@ -13,6 +13,8 @@ from typing import Tuple
 
 from comfy_api.latest import io
 
+from .shared_utils import resolve_output_path
+
 try:
     import folder_paths
 except ImportError:
@@ -302,17 +304,12 @@ class ExtractRestPose(io.ComfyNode):
         log.info("Source type: %s", source_type)
 
         # Setup output path
-        if folder_paths:
-            output_dir = folder_paths.get_output_directory()
-        else:
-            output_dir = "output"
-            os.makedirs(output_dir, exist_ok=True)
-
         if not output_name.endswith('.fbx'):
             output_name_fbx = f"{output_name}.fbx"
         else:
             output_name_fbx = output_name
-        output_path = os.path.join(output_dir, output_name_fbx)
+        output_path = str(resolve_output_path(output_name_fbx))
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
         if source_type == "fbx":
             # Validate FBX path
@@ -325,8 +322,8 @@ class ExtractRestPose(io.ComfyNode):
                     input_dir = folder_paths.get_input_directory()
                     if os.path.exists(os.path.join(input_dir, fbx_path)):
                         fbx_path = os.path.join(input_dir, fbx_path)
-                    elif os.path.exists(os.path.join(output_dir, fbx_path)):
-                        fbx_path = os.path.join(output_dir, fbx_path)
+                    elif os.path.exists(os.path.join(folder_paths.get_output_directory(), fbx_path)):
+                        fbx_path = os.path.join(folder_paths.get_output_directory(), fbx_path)
 
             if not os.path.exists(fbx_path):
                 raise FileNotFoundError(f"FBX file not found: {fbx_path}")

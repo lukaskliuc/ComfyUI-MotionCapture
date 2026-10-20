@@ -5,9 +5,16 @@ __pycache__/
 *.so
 
 # Virtual environments
+/.venv/
 venv/
 ENV/
 env/
+
+# Local test data and generated results (bundled assets remain tracked)
+/input/
+/output/
+/models/
+/logs/
 
 # IDE
 .idea/
@@ -48,3 +55,5 @@ _env_*
 # Built web assets
 web/
 
+# Personal fix checklist
+/FIXES.md

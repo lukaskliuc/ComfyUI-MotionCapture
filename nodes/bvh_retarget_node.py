@@ -10,6 +10,8 @@ from typing import Dict, Tuple
 
 from comfy_api.latest import io
 
+from .shared_utils import resolve_output_path
+
 log = logging.getLogger("motioncapture")
 
 
@@ -429,9 +431,7 @@ class BVHtoFBX(io.ComfyNode):
             log.info(f"[BVHtoFBX] Character type: {character_type}")
 
             # Prepare output directory
-            output_path = Path(output_path)
-            if not output_path.is_absolute() and not str(output_path).startswith(("output/", "temp/")):
-                output_path = Path("output") / output_path
+            output_path = resolve_output_path(output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Ensure correct extension

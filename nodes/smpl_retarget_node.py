@@ -17,6 +17,8 @@ import torch
 
 from comfy_api.latest import io
 
+from .shared_utils import resolve_output_path
+
 log = logging.getLogger("motioncapture")
 
 from .smpl_bvh_utils import SMPL_BONE_NAMES as SMPL_JOINT_NAMES
@@ -261,12 +263,10 @@ class SMPLRetargetToSMPL(io.ComfyNode):
                 raise FileNotFoundError(f"Input FBX not found: {rigged_fbx_path}")
 
             # Prepare output path
-            output_dir = Path("output")
-            output_dir.mkdir(exist_ok=True)
-
             if not output_filename.endswith('.fbx'):
                 output_filename = f"{output_filename}.fbx"
-            output_path = output_dir / output_filename
+            output_path = resolve_output_path(output_filename)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Extract SMPL parameters to temporary NPZ
             temp_dir = Path(tempfile.gettempdir())

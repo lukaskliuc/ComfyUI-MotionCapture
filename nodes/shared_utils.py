@@ -1,6 +1,6 @@
 """Shared utility functions for MotionCapture nodes."""
 
-import os
+from pathlib import Path
 
 import folder_paths
 
@@ -19,25 +19,13 @@ def next_sequential_filename(directory, prefix, ext):
     return f"{prefix}_{max_num + 1:04d}{ext}"
 
 
-def resolve_file_path(file_path):
-    """Resolve a file path that may have [output] prefix to an absolute path.
-
-    Checks output folder (if prefixed with [output]), input folder, and absolute paths.
-    Returns None if the file is not found.
-    """
-    if file_path.startswith("[output] "):
-        clean_path = file_path.replace("[output] ", "")
-        output_dir = folder_paths.get_output_directory()
-        output_path = os.path.join(output_dir, clean_path)
-        if os.path.exists(output_path):
-            return output_path
-    else:
-        input_dir = folder_paths.get_input_directory()
-        input_path = os.path.join(input_dir, file_path)
-        if os.path.exists(input_path):
-            return input_path
-
-    if os.path.exists(file_path):
-        return file_path
-
-    return None
+def resolve_output_path(filename):
+    """Resolve export names against ComfyUI's configured output or temp folder."""
+    path = Path(str(filename).replace("\\", "/"))
+    if path.is_absolute():
+        return path
+    directory = folder_paths.get_output_directory()
+    if path.parts and path.parts[0] in ("output", "temp"):
+        directory = folder_paths.get_directory_by_type(path.parts[0])
+        path = Path(*path.parts[1:])
+    return Path(directory) / path

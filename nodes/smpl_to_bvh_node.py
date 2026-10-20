@@ -2,15 +2,15 @@
 SMPLtoBVH Node - Convert SMPL motion data to BVH format
 """
 
-import os
 from pathlib import Path
 from typing import Dict, Tuple
 import torch
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-import folder_paths
 
 from comfy_api.latest import io
+
+from .shared_utils import resolve_output_path
 
 from .motion_utils.pylogger import Log
 
@@ -217,10 +217,9 @@ class SMPLtoBVH(io.ComfyNode):
             data = np.load(str(npz_file))
 
             # Prepare output path in ComfyUI output folder
-            output_dir = folder_paths.get_output_directory()
             if not filename.endswith('.bvh'):
                 filename = filename + '.bvh'
-            output_path = Path(os.path.join(output_dir, filename))
+            output_path = resolve_output_path(filename)
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Get motion data from NPZ

@@ -8,6 +8,7 @@ license = {file = "LICENSE"}
 Repository = "https://github.com/PozzettiAndrea/ComfyUI-MotionCapture"
 
 [tool.comfy]
+web = "javascript"
 PublisherId = "pznodes"
 DisplayName = "MotionCapture"
 Icon = "https://raw.githubusercontent.com/PozzettiAndrea/ComfyUI-MotionCapture/main/assets/icon.png"

@@ -15,6 +15,8 @@ import numpy as np
 
 from comfy_api.latest import io
 
+from .shared_utils import resolve_output_path
+
 log = logging.getLogger("motioncapture")
 
 from .smpl_bvh_utils import smpl_to_bvh
@@ -273,12 +275,10 @@ class SMPLToMixamo(io.ComfyNode):
                 raise FileNotFoundError(f"Mixamo FBX not found: {mixamo_fbx_path}")
 
             # Prepare output directory
-            output_dir = Path("output")
-            output_dir.mkdir(parents=True, exist_ok=True)
-
             if not output_filename.endswith('.fbx'):
                 output_filename = f"{output_filename}.fbx"
-            output_path = output_dir / output_filename
+            output_path = resolve_output_path(output_filename)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
 
             log.info("Using SMPL data: %s", smpl_npz_path)
 

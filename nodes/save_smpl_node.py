@@ -2,12 +2,13 @@
 SaveSMPL Node - Save SMPL motion data to disk for reuse
 """
 
-from pathlib import Path
 from typing import Dict, Tuple
 import torch
 import numpy as np
 
 from comfy_api.latest import io
+
+from .shared_utils import resolve_output_path
 
 from .motion_utils.pylogger import Log
 
@@ -54,7 +55,7 @@ class SaveSMPL(io.ComfyNode):
             Log.info("[SaveSMPL] Saving SMPL motion data...")
 
             # Prepare output directory
-            output_path = Path(output_path)
+            output_path = resolve_output_path(output_path)
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Ensure .npz extension
